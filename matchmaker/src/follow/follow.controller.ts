@@ -20,8 +20,8 @@ export class FollowController {
   }
 
   @UseGuards(UserGuard)
-  @Delete(':id')
-  remove(@Param('id') id: string, @Headers("session") session: string) {
+  @Delete()
+  remove(@Body('toFollow') id: string, @Headers("session") session: string) {
     return this.followService.remove(+id, session);
   }
 }

@@ -64,9 +64,11 @@ export class FollowService {
         let user = await this.prisma.user.findUnique({
             where: {
                 token: session
-
             }
         });
+        if(user== null){
+            throw new HttpException("User could not be found", 404);
+        }
 
         return this.prisma.follows.delete({
             where: {
