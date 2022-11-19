@@ -31,7 +31,17 @@ export class TickerService {
   }
 
   findAll() {
-    return this.prisma.ticker.findMany();
+    return this.prisma.ticker.findMany({
+        include: {
+            TickerHistory: {
+                take: 1,
+                orderBy: {
+                    executed_at: "desc"
+                },
+
+            }
+        }
+    });
   }
 
   async findOne(ticker: string, limit : number) {
