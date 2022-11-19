@@ -201,7 +201,7 @@ export class MarketActionService {
         }
         if (marketAction.userId != userId.id) {
             Logger.log("marketAction.userId != userId.id");
-            throw new HttpException("Unauthorized", 401);
+            throw new HttpException("Unauthorized", 403);
         }
 
         let old = await this.prisma.marketAction.delete({
@@ -209,6 +209,18 @@ export class MarketActionService {
                 id: id,
             }
         });
+
+        await this.prisma.marketActionHistory.create({
+            data: {
+                userId: userId.id,
+                tickerId: marketAction.tickerId,
+                typeOfMarketAction: marketAction.typeOfMarketAction,
+                price: marketAction.price,
+                shares: old.shares,
+                typeOfChange: "Delete",
+            }
+        });
+
         return {
             success: true,
             amount: old.shares,
