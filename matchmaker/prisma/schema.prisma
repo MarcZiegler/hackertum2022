@@ -18,6 +18,7 @@ model User {
   isRealUser          Boolean               @default(true) // is the user a real user or controlled by a server
   MarketActionHistory MarketActionHistory[]
   MarketAction        MarketAction[]
+  Money               Float                 @default(10000)
   token               String                @unique @default(uuid())
 }
 
@@ -69,6 +70,7 @@ model MarketAction {
   MarketActionHistory MarketActionHistory[]
   price               Float
   shares              Int
+
   @@unique([userId, tickerId, typeOfMarketAction, price])
 }
 

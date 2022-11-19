@@ -4,6 +4,18 @@ import {UpdateMarketActionDto} from './dto/update-market-action.dto';
 import {PrismaService} from "../prisma/prisma";
 import {Prisma, TypeOfMarketAction} from "@prisma/client";
 
+export type Enumerable<T> = T | Array<T>;
+
+export type FloatFilter = {
+    equals?: number
+    in?: Enumerable<number>
+    notIn?: Enumerable<number>
+    lt?: number
+    lte?: number
+    gt?: number
+    gte?: number
+}
+
 interface PostMarketActionResultDTO {
     success: boolean;
     amount: number;
@@ -40,6 +52,7 @@ export class MarketActionService {
         });
 
         let res = this.prisma.$transaction(async (tx) : Promise<PostMarketActionResultDTO>  => {
+
             let marketAction = await tx.marketAction.upsert({
                 where: {
                     userId_tickerId_typeOfMarketAction_price: {
@@ -52,7 +65,8 @@ export class MarketActionService {
                 update: {
                     shares: {
                         increment: createMarketActionDto.shares
-                    }
+                    },
+
                 },
                 create: {
                     user: {
@@ -94,14 +108,19 @@ export class MarketActionService {
                     }
                 }
             });
-            Logger.log((createMarketActionDto.marketAction == TypeOfMarketAction.BUY) ? TypeOfMarketAction.SELL : TypeOfMarketAction.BUY);
+
             // now lets check if we can make a trade
-            //TODO check funds
+            let price_buy: FloatFilter = {
+                    lte: createMarketActionDto.price
+            }
+            let price_sell: FloatFilter  = {
+                gte: createMarketActionDto.price
+            }
+            let price = createMarketActionDto.marketAction ==  TypeOfMarketAction.BUY ? price_buy : price_sell;
+
             let possibilityForTrade = await tx.marketAction.findMany({
                 where: {
-                    price: {
-                        lte: createMarketActionDto.price,
-                    },
+                    price,
                     tickerId: tickerId.id,
                     typeOfMarketAction: (createMarketActionDto.marketAction == TypeOfMarketAction.BUY) ? TypeOfMarketAction.SELL : TypeOfMarketAction.BUY,
                     NOT: {
@@ -109,16 +128,19 @@ export class MarketActionService {
                     },
                     shares: {
                         gt: 0
-                    }
+                    },
                 },
                 orderBy: [
                     {
                         price: (createMarketActionDto.marketAction == TypeOfMarketAction.BUY) ? "asc" : "desc",
                     },
                     {
-                        createdAt: "asc"
+                        updatedAt: "asc"
                     }
                 ],
+                include: {
+                    user: true
+                }
             });
             if (possibilityForTrade.length > 0) {
                 Logger.log("Found possibility for trade", possibilityForTrade);
@@ -129,9 +151,15 @@ export class MarketActionService {
                     if (sharesLeft <= 0) {
                         break;
                     }
+
                     let partner = possibilityForTrade[possiblePartner];
-                    let sharesToTrade = Math.min(sharesLeft, partner.shares);
+                    let user = partner.typeOfMarketAction == TypeOfMarketAction.BUY ? partner.user : userId;
+                    let seller = partner.typeOfMarketAction == TypeOfMarketAction.SELL ? partner.user : userId;
+
+                    let sharesToTrade = Math.min(sharesLeft, partner.shares, user.Money/partner.price);
+                    Logger.log("sharesToTrade", sharesToTrade);
                     minPrice = Math.min(minPrice, partner.price);
+                    Logger.log("minPrice", minPrice);
                     sharesLeft -= sharesToTrade;
                     let partnerTrade = await tx.marketAction.update({
                         where: {
@@ -159,6 +187,22 @@ export class MarketActionService {
                             tickerId: tickerId.id,
                             amount: sharesToTrade,
                             price: minPrice,
+                        }
+                    });
+                     await tx.user.update({
+                        where: { id: user.id },
+                        data: {
+                            Money: {
+                                decrement: minPrice * sharesToTrade
+                            }
+                        }
+                    });
+                    await tx.user.update({
+                        where: { id: seller.id },
+                        data: {
+                            Money: {
+                                increment: minPrice * sharesToTrade
+                            }
                         }
                     });
                 }
