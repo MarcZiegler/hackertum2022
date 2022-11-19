@@ -35,6 +35,10 @@ export class UserService {
   }
 
   findAll(session: string): Promise<userFollowed[]> {
-    return this.prisma.$queryRaw`SELECT *,CASE WHEN EXISTS(SELECT * FROM Follows where Follows.followsId = User.id and Exists(SELECT * FROM User u2 where u2.token = ${session} and u2.id = Follows.followedByID)) THEN 1 ELSE 0 END AS isFollowed FROM User WHERE User.isRealUser = 0\``
+    // @ts-ignore
+    BigInt.prototype.toJSON = function() {
+      return this.toString()
+    }
+    return this.prisma.$queryRaw`SELECT *,CASE WHEN EXISTS(SELECT * FROM Follows where Follows.followsId = User.id and Exists(SELECT * FROM User u2 where u2.token = ${session} and u2.id = Follows.followedByID)) THEN 1 ELSE 0 END AS isFollowed FROM User WHERE User.isRealUser = 0`
   }
 }

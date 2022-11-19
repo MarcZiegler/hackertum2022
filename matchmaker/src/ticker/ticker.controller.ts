@@ -16,6 +16,7 @@ export class TickerController {
   @UseGuards(UserGuard)
   @Get()
   findAll() {
+    //TODO add last trade
     return this.tickerService.findAll();
   }
 
