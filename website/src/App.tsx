@@ -73,12 +73,9 @@ const App: React.FC = () => {
       await console.log(container);
   }, []);
   */
-  const authContext = useAuthContext();
   return <>
     <div className="App">
       <AuthContextProvider>
-      {
-        authContext!.auth === null ? <Login/> :
       <Router>
         <ThemeProvider theme={theme}>
           <Routes>
@@ -88,7 +85,6 @@ const App: React.FC = () => {
           </Routes>
         </ThemeProvider>
       </Router>
-      }
       </AuthContextProvider>
     </div>
   </>

@@ -3,11 +3,13 @@ import React, { useState } from 'react';
 import _ from 'lodash';
 import { useAuthContext } from './context/AuthContext';
 import { SERVER_URL } from './FrontPage';
+import { AuthType } from 'AuthTypes';
 type LoginProps = {
 
 }
 
 const LOGIN_ENDPOINT = SERVER_URL + "/user"
+export const LOCAL_STORAGE_AUTH_KEY = "auth"
 /**
  * Login and register page
  * @param todo todo
@@ -20,8 +22,10 @@ export const Login: React.FC<LoginProps> = (props) => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string|null>(null);
+    const [loading, setLoading] = useState(false);
 
     const onSubmitHandler = () => {
+        setLoading(true);
         fetch(LOGIN_ENDPOINT, {
             method: "POST",
             headers: {
@@ -29,21 +33,28 @@ export const Login: React.FC<LoginProps> = (props) => {
             },
             body: JSON.stringify({
                 username: username,
-                isRealUser: "true"
+                isRealUser: true
             })
         }).then((response) => {
+            setLoading(false);
             if (response.ok) {
                 response.json().then((data) => {
                     console.log({
                         token: data.token, //uuid
                         username: data.username, //username
-                        money: data.money, //money
-                    })
-                    setAuth({
-                        token: data.token, //uuid
-                        username: data.username, //username
-                        money: data.money, //money
-                    });
+                        money: data.Money, //money
+                    } as AuthType)
+                    console.log(data.Money)
+                    if (setAuth !== null) {
+                        let authParsed: AuthType = {
+                            token: data.token, //uuid
+                            username: data.username, //username
+                            money: data.Money, //money
+                        }
+                        //setAuth(authParsed) //TODO: this does nothing
+                        window.localStorage.setItem(LOCAL_STORAGE_AUTH_KEY, JSON.stringify(authParsed))
+                        window.location.reload()
+                    };
                 })
             } else if (response.status == 500) {
                 setError("Username taken");
@@ -65,7 +76,7 @@ export const Login: React.FC<LoginProps> = (props) => {
             <Stack direction="column" justifyContent='center' divider={<Divider flexItem />} sx={{marginY:"10px"}}>
                 <TextField value={username} onChange={e=>setUsername(e.target.value)} variant="outlined" label={onLogin?"Username":"New Username"} sx={{margin:"10px"}}/>
                 <TextField value={password} onChange={e=>setPassword(e.target.value)} type="password" variant="outlined" label={onLogin?"Password":"Set Password"} sx={{margin:"10px"}}/>
-                <Button onClick={()=>onSubmitHandler()} sx={{mx:"10px"}}>
+                <Button disabled={loading} onClick={()=>onSubmitHandler()} sx={{mx:"10px"}}>
                     Submit
                 </Button>
             </Stack>

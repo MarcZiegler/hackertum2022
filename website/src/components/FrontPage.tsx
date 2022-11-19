@@ -9,7 +9,7 @@ type FrontPageProps = {
 
 }
 
-export const SERVER_URL = "http://localhost:5000" //TODO: change to production server
+export const SERVER_URL = "http://localhost:3000" //TODO: change to production server
 
 /**
  * Main page
