@@ -4,6 +4,8 @@ import {Logger} from "@nestjs/common";
 import { PrismaService } from '../prisma/prisma';
 import { User, Prisma } from '@prisma/client';
 
+export type userFollowed = User & {isFollowed: number}
+
 @Injectable()
 export class UserService {
   constructor(private prisma: PrismaService) {}
@@ -30,5 +32,9 @@ export class UserService {
             token: session
         }
     });
+  }
+
+  findAll(session: string): Promise<userFollowed[]> {
+    return this.prisma.$queryRaw`SELECT *,CASE WHEN EXISTS(SELECT * FROM Follows where Follows.followsId = User.id and Exists(SELECT * FROM User u2 where u2.token = ${session} and u2.id = Follows.followedByID)) THEN 1 ELSE 0 END AS isFollowed FROM User WHERE User.isRealUser = 0\``
   }
 }

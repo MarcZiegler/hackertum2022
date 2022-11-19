@@ -22,6 +22,7 @@ model User {
   token               String                @unique @default(uuid())
   follows  Follows[] @relation("follows")
   followedBy Follows[] @relation("followedBy")
+  pnl                   Float @default(0)
 }
 
 model Follows {

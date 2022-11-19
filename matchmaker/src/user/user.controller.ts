@@ -17,6 +17,12 @@ export class UserController {
     }
   }
 
+  @Get("traders")
+  @UseGuards(UserGuard)
+  getAll(@Headers("session") session: string){
+    return this.userService.findAll(session);
+  }
+
   @Get()
   @UseGuards(UserGuard)
   get(@Headers("session") session: string){

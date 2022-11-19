@@ -52,7 +52,7 @@ export const FrontPage: React.FC<FrontPageProps> = (props) => {
         <Stack>
             <SubtitleTypography>Stocks</SubtitleTypography>
             {stockData ? 
-                <Table>
+                <Table style={{marginLeft: "2%", marginRight:"2%", width: "96%"}}>
                     <TableHead>
                     <TableRow>
                         <TableCell>Company</TableCell>

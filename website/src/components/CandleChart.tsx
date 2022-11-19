@@ -65,7 +65,7 @@ const CandleChart: React.FC<CandleProps> = (props) => {
 
   return (
     <>
-      <Box sx={{ zIndex: 5 , position: "relative"}}>
+      <Box sx={{ zIndex: 5 , position: "relative", marginLeft: "2%", marginRight: "2%"}}>
         <svg width="100%" height={window.innerHeight} ref={containerRef} style={{position: "absolute" , background: "white"}}>
           <svg id="content">
           </svg>
