@@ -226,4 +226,15 @@ export class MarketActionService {
             amount: old.shares,
         }
     }
+
+    async findAll(ticker: string, type: TypeOfMarketAction) {
+        return this.prisma.marketAction.findMany({
+            where: {
+                ticker: {
+                    ticker
+                },
+                typeOfMarketAction: type
+            }
+        });
+    }
 }
