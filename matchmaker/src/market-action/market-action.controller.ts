@@ -1,7 +1,6 @@
 import {Controller, Get, Post, Body, Param, Delete, Headers, UseGuards} from '@nestjs/common';
 import { MarketActionService } from './market-action.service';
 import { CreateMarketActionDto } from './dto/create-market-action.dto';
-import { UpdateMarketActionDto } from './dto/update-market-action.dto';
 import {UserGuard} from "../user/user.guard";
 
 @Controller('market-action')
@@ -10,17 +9,13 @@ export class MarketActionController {
 
   @Post()
   @UseGuards(UserGuard)
-  create(@Body() createMarketActionDto: CreateMarketActionDto, @Headers("session") session: string) {
-    return this.marketActionService.create(createMarketActionDto, session);
-  }
-
-  @Get()
-  findAll() {
-    return this.marketActionService.findAll();
+  async create(@Body() createMarketActionDto: CreateMarketActionDto, @Headers("session") session: string) {
+    return await this.marketActionService.create(createMarketActionDto, session);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.marketActionService.remove(+id);
+  @UseGuards(UserGuard)
+  remove(@Param('id') id: string, @Headers("session") session: string) {
+    return this.marketActionService.remove(+id, session);
   }
 }

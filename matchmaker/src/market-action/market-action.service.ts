@@ -1,4 +1,4 @@
-import {Injectable, Logger} from '@nestjs/common';
+import {HttpException, Injectable, Logger} from '@nestjs/common';
 import {CreateMarketActionDto} from './dto/create-market-action.dto';
 import {UpdateMarketActionDto} from './dto/update-market-action.dto';
 import {PrismaService} from "../prisma/prisma";
@@ -11,6 +11,12 @@ interface PostMarketActionResultDTO {
     peopleTradedWith: number[];
 }
 
+interface DeleteMarketActionResultDTO {
+    success: boolean;
+    amount: number;
+}
+
+export {PostMarketActionResultDTO, DeleteMarketActionResultDTO};
 
 @Injectable()
 export class MarketActionService {
@@ -181,11 +187,31 @@ export class MarketActionService {
         return res;
     }
 
-    findAll() {
-        return `This action returns all marketAction`;
-    }
+    async remove(id: number, session: string): Promise<DeleteMarketActionResultDTO> {
+        Logger.log("id", id);
+        Logger.log(`session: ${session}`);
+        let userId = await this.prisma.user.findUnique({
+            where: {token: session}
+        });
 
-    remove(id: number) {
-        return `This action removes a #${id} marketAction`;
+        let marketAction = await this.prisma.marketAction.findUnique({where: {id: id}});
+        if (marketAction == null) {
+            Logger.log("marketAction == null");
+            throw new HttpException("MarketAction not found", 404);
+        }
+        if (marketAction.userId != userId.id) {
+            Logger.log("marketAction.userId != userId.id");
+            throw new HttpException("Unauthorized", 401);
+        }
+
+        let old = await this.prisma.marketAction.delete({
+            where: {
+                id: id,
+            }
+        });
+        return {
+            success: true,
+            amount: old.shares,
+        }
     }
 }
