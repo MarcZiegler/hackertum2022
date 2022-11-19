@@ -9,8 +9,8 @@ export class TickerController {
 
   @UseGuards(UserGuard)
   @Post()
-  create(@Body() createTickerDto: CreateTickerDto) {
-    return this.tickerService.create(createTickerDto);
+  async create(@Body() createTickerDto: CreateTickerDto) {
+    return await this.tickerService.create(createTickerDto);
   }
 
   @UseGuards(UserGuard)
@@ -21,7 +21,7 @@ export class TickerController {
 
   @UseGuards(UserGuard)
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.tickerService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    return await this.tickerService.findOne(id, 50);
   }
 }
