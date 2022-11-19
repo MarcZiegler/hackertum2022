@@ -48,7 +48,7 @@ export class MarketActionService {
         });
 
         if (userId == null) {
-            throw new Error("User not found");
+            throw new HttpException("User not found", 404);
         }
 
         let res = this.createMarketAction(userId, createMarketActionDto, session);

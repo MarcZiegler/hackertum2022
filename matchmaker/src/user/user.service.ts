@@ -23,4 +23,12 @@ export class UserService {
     }
 
   }
+
+  get(session: string) {
+    return this.prisma.user.findUnique({
+        where: {
+            token: session
+        }
+    });
+  }
 }
