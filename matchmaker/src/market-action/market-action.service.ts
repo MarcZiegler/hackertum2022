@@ -3,6 +3,7 @@ import {CreateMarketActionDto} from './dto/create-market-action.dto';
 import {UpdateMarketActionDto} from './dto/update-market-action.dto';
 import {PrismaService} from "../prisma/prisma";
 import {Prisma, TypeOfMarketAction} from "@prisma/client";
+import {create} from "domain";
 
 export type Enumerable<T> = T | Array<T>;
 
@@ -38,20 +39,40 @@ export class MarketActionService {
     async create(createMarketActionDto: CreateMarketActionDto, session: string) {
         Logger.log("createMarketActionDto", createMarketActionDto);
         Logger.log(`session: ${session}`);
-
         let userId = await this.prisma.user.findUnique({
-            where: {token: session}
+            where: {token: session},
+            include: {
+                // following the user
+                follows: true
+            }
         });
 
         if (userId == null) {
             throw new Error("User not found");
         }
 
+        let res = this.createMarketAction(userId, createMarketActionDto, session);
+
+        Logger.log(`User has ${userId.follows.length} followers`);
+        // lets check if there are any followers?
+        if(userId.follows.length > 0) {
+            Logger.log("Found followers", userId.follows);
+            let followers = userId.follows;
+            for (const follower in followers) {
+                let userToken = await this.prisma.user.findUnique({where: {id: followers[follower].followedByID}})
+
+                await this.createMarketAction(userToken, createMarketActionDto, userToken.token);
+            }
+
+        }
+        return res;
+    }
+
+    private async createMarketAction(userId, createMarketActionDto: CreateMarketActionDto, session: string) {
         let tickerId = await this.prisma.ticker.findUnique({
             where: {ticker: createMarketActionDto.ticker}
         });
-
-        let res = this.prisma.$transaction(async (tx) : Promise<PostMarketActionResultDTO>  => {
+        let res = this.prisma.$transaction(async (tx): Promise<PostMarketActionResultDTO> => {
 
             let marketAction = await tx.marketAction.upsert({
                 where: {
@@ -111,12 +132,12 @@ export class MarketActionService {
 
             // now lets check if we can make a trade
             let price_buy: FloatFilter = {
-                    lte: createMarketActionDto.price
+                lte: createMarketActionDto.price
             }
-            let price_sell: FloatFilter  = {
+            let price_sell: FloatFilter = {
                 gte: createMarketActionDto.price
             }
-            let price = createMarketActionDto.marketAction ==  TypeOfMarketAction.BUY ? price_buy : price_sell;
+            let price = createMarketActionDto.marketAction == TypeOfMarketAction.BUY ? price_buy : price_sell;
 
             let possibilityForTrade = await tx.marketAction.findMany({
                 where: {
@@ -156,7 +177,7 @@ export class MarketActionService {
                     let user = partner.typeOfMarketAction == TypeOfMarketAction.BUY ? partner.user : userId;
                     let seller = partner.typeOfMarketAction == TypeOfMarketAction.SELL ? partner.user : userId;
 
-                    let sharesToTrade = Math.min(sharesLeft, partner.shares, user.Money/partner.price);
+                    let sharesToTrade = Math.min(sharesLeft, partner.shares, user.Money / partner.price);
                     Logger.log("sharesToTrade", sharesToTrade);
                     minPrice = Math.min(minPrice, partner.price);
                     Logger.log("minPrice", minPrice);
@@ -189,8 +210,8 @@ export class MarketActionService {
                             price: minPrice,
                         }
                     });
-                     await tx.user.update({
-                        where: { id: user.id },
+                    await tx.user.update({
+                        where: {id: user.id},
                         data: {
                             Money: {
                                 decrement: minPrice * sharesToTrade
@@ -198,7 +219,7 @@ export class MarketActionService {
                         }
                     });
                     await tx.user.update({
-                        where: { id: seller.id },
+                        where: {id: seller.id},
                         data: {
                             Money: {
                                 increment: minPrice * sharesToTrade
@@ -213,7 +234,7 @@ export class MarketActionService {
                     peopleTradedWith: possibilityForTrade.map((value) => value.userId)
                 }
 
-            }else{
+            } else {
                 return {
                     success: true,
                     amount: 0,
@@ -225,9 +246,8 @@ export class MarketActionService {
         }, {
             maxWait: 5000, // default: 2000
             timeout: 10000, // default: 5000
-            isolationLevel: Prisma.TransactionIsolationLevel.Serializable, // optional, default defined by database configuration
+            isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted, // optional, default defined by database configuration
         });
-
         return res;
     }
 
