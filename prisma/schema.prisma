@@ -2,10 +2,78 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialIntegrity"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider             = "mysql"
+  url                  = env("DATABASE_URL")
+  referentialIntegrity = "prisma"
+}
+
+model User {
+  id                  Int                   @id @default(autoincrement())
+  username            String                @unique // max length 191 chars
+  isRealUser          Boolean               @default(true) // is the user a real user or controlled by a server
+  MarketActionHistory MarketActionHistory[]
+  MarketAction        MarketAction[]
+}
+
+enum TypeOfMarketAction {
+  BUY
+  SELL
+}
+
+enum TypeOfChange {
+  Add
+  Delete
+}
+
+model Ticker {
+  id            Int                   @id @default(autoincrement())
+  ticker        String                @unique @db.VarChar(10)
+  name          String
+  marketActions MarketActionHistory[]
+  MarketAction  MarketAction[]
+  TickerHistory TickerHistory[]
+}
+
+model MarketActionHistory {
+  id                 Int                @id @default(autoincrement())
+  typeOfMarketAction TypeOfMarketAction
+  typeOfChange       TypeOfChange
+  user               User               @relation(fields: [userId], references: [id])
+  userId             Int
+  createdAt          DateTime           @default(now())
+  ticker             Ticker             @relation(fields: [tickerId], references: [id])
+  tickerId           Int
+  marketAction       MarketAction?      @relation(fields: [marketActionId], references: [id], onDelete: SetNull)
+  marketActionId     Int?
+  price              Float
+  tickerHistory      TickerHistory[]
+}
+
+model MarketAction {
+  id                 Int                @id @default(autoincrement())
+  typeOfMarketAction TypeOfMarketAction
+  user               User               @relation(fields: [userId], references: [id])
+  userId             Int
+  ticker             Ticker             @relation(fields: [tickerId], references: [id])
+  tickerId           Int
+
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  MarketActionHistory MarketActionHistory[]
+  price               Float
+}
+
+model TickerHistory {
+  id            Int                   @id @default(autoincrement())
+  ticker        Ticker                @relation(fields: [tickerId], references: [id])
+  tickerId      Int
+  executed_at   DateTime              @default(now())
+  amount        Int
+  price         Float
+  marketActions MarketActionHistory[]
 }
