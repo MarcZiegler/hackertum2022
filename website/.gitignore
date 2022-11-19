@@ -20,7 +20,6 @@ firebase-debug.*.log*
 # production
 .env
 /build
-*.js
 *.pem
 
 # misc
