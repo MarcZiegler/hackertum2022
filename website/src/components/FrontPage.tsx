@@ -1,4 +1,4 @@
-import { List, Stack, Table, TableCell, TableHead, TableRow, Typography, TypographyProps, useTheme } from '@mui/material';
+import { Button, Drawer, List, Stack, Table, TableCell, TableHead, TableRow, Typography, TypographyProps, useTheme } from '@mui/material';
 import React, { useEffect, useRef, useState } from 'react';
 import _ from 'lodash';
 import CandleChart from './CandleChart';
@@ -19,6 +19,7 @@ type FrontPageProps = {
 export const FrontPage: React.FC<FrontPageProps> = (props) => {
     const theme = useTheme();
     const graphRef = useRef<HTMLDivElement>(null)
+    const [openDrawer, setOpenDrawer] = useState(false);
     const [stockData, setStockData] = useState<StockData[] | null>([
         {
             id: 984312,
@@ -46,12 +47,21 @@ export const FrontPage: React.FC<FrontPageProps> = (props) => {
     useEffect(() => {
         fetch(SERVER_URL)
         .then(response => response.json())
-        .then(data => setStockData(data)) //TODO: add error handling
+        .then(data => setStockData(data.splice(-100))) //TODO: add error handling
     }, [])
     return (
+        <>
+        <Button onClick={()=>setOpenDrawer(true)} sx={{position:"fixed",top:"0",left:"", marginLeft:"5px",marginTop:"5px"}}>Show Traders</Button>
         <Stack>
             <SubtitleTypography>Stocks</SubtitleTypography>
-            <Traders/>
+            <Drawer
+                anchor="left"
+                open={openDrawer}
+                onClose={() => {setOpenDrawer(false)}}
+            >
+                
+                <Traders/>
+            </Drawer>
             {stockData ? 
                 <Table style={{marginLeft: "2%", marginRight:"2%", width: "96%"}}>
                     <TableHead>
@@ -88,6 +98,7 @@ export const FrontPage: React.FC<FrontPageProps> = (props) => {
                 <Typography>Loading...</Typography>
             }
         </Stack>
+        </>
     );
 
 }

@@ -8,7 +8,7 @@ import { CandlestickChart } from './candle';
 import { SERVER_URL } from './enums/Constants';
 
 type CandleProps = {
-  data: any;
+  data: GraphData[] | null;
 }
 
 /**
@@ -18,27 +18,16 @@ type CandleProps = {
  */
 const CandleChart: React.FC<CandleProps> = (props) => {
   const containerRef = useRef<any>(null);
-  const [data, setData] = useState(props.data as GraphData[]);
   // SVG debounced with to trigger rerender on window size change
   const [width, setWidth] = useState<number | undefined>(1000);
-
+  console.log(props?.data)
   useEffect(() => {
     // Debounced rerender on resize
     const handleResize = debounce(() => setWidth(containerRef.current.clientWidth), 500);
     window.addEventListener('resize', handleResize);
 
-    // Set interval to update data
-    const updateInterval = setInterval(() => {
-      // Update data
-      return;
-      fetch(SERVER_URL)
-        .then(response => response.json())
-        .then(data => setData(data)) //TODO: add error handling
-    }, 1000);
-
     //Cleanup on unmount
     return () => {
-      clearInterval(updateInterval);
       window.removeEventListener('resize', handleResize);
     };
   }, [])
@@ -46,22 +35,25 @@ const CandleChart: React.FC<CandleProps> = (props) => {
   useLayoutEffect(() => {
     // Generate candlestick graph
     containerRef.current.clientWidth && setWidth(containerRef.current.clientWidth);
-    CandlestickChart(data, {
-      date: (d:any) => new Date(d.Date),
-      high: (d:any) => d.High,
-      low: (d:any) => d.Low,
-      open: (d:any) => d.Open,
-      close: (d:any) => d.Close,
-      yLabel: "↑ Price ($)",
-      width:width, //TODO: make dynamic
-      height: 300
-    } as any);
-    console.log(width)
+    if (props.data) {
+      CandlestickChart(props.data, {
+        date: (d:any) => d.Date,
+        high: (d:any) => d.High,
+        low: (d:any) => d.Low,
+        open: (d:any) => d.Open,
+        close: (d:any) => d.Close,
+        yLabel: "↑ Price ($)",
+        width: width, //TODO: make dynamic
+        height: 300
+      } as any);
+    }
+    
+    //console.log(width)
     return () => {
       // cleanup
       d3.select("svg#content").selectAll('*').remove();
     }
-  }, [data, width]);
+  }, [props.data, width]);
 
   return (
     <>
