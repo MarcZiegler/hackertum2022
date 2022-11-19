@@ -2,8 +2,8 @@ import { Alert, Box, Button, Divider, Paper, Snackbar, Stack, TextField, Typogra
 import React, { useState } from 'react';
 import _ from 'lodash';
 import { useAuthContext } from './context/AuthContext';
-import { SERVER_URL } from './FrontPage';
 import { AuthType } from 'AuthTypes';
+import { SERVER_URL } from './enums/Constants';
 type LoginProps = {
 
 }

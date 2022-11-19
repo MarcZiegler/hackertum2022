@@ -8,3 +8,4 @@ export enum NavBarState {
     NONE
 }
 */
+export const SERVER_URL = "http://localhost:3000" //TODO: change to production server

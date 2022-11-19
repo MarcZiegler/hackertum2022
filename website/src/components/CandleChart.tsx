@@ -5,7 +5,7 @@ import { debounce } from 'lodash';
 import _ from 'lodash';
 import { GraphData } from 'GraphTypes';
 import { CandlestickChart } from './candle';
-import { SERVER_URL } from './FrontPage';
+import { SERVER_URL } from './enums/Constants';
 
 type CandleProps = {
   data: any;
