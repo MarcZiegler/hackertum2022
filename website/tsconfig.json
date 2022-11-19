@@ -1,0 +1,41 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": false,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": false,
+    "noEmit": true,
+    "jsx": "react",
+    "experimentalDecorators": true,
+    "sourceMap": true,
+    "downlevelIteration":true,
+    "outDir": "build",
+    "baseUrl": ".",
+    "paths": {
+        "*": [
+            "node_modules/",
+            "src/types/*"
+        ]
+    }
+  },
+  "include": [
+    "src"
+  ],
+  "typeRoots": [
+    "node_modules/@types",
+    "src/types"
+  ] 
+}
