@@ -4,12 +4,12 @@ import _ from 'lodash';
 import CandleChart from './CandleChart';
 import StockPage from './StockPage';
 import { StockData } from 'GraphTypes';
+import Traders from './Traders';
+import { SERVER_URL } from './enums/Constants';
 
 type FrontPageProps = {
 
 }
-
-export const SERVER_URL = "http://localhost:3000" //TODO: change to production server
 
 /**
  * Main page
@@ -51,6 +51,7 @@ export const FrontPage: React.FC<FrontPageProps> = (props) => {
     return (
         <Stack>
             <SubtitleTypography>Stocks</SubtitleTypography>
+            <Traders/>
             {stockData ? 
                 <Table style={{marginLeft: "2%", marginRight:"2%", width: "96%"}}>
                     <TableHead>

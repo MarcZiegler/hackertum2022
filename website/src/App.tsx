@@ -12,6 +12,7 @@ import StockPage from './components/StockPage';
 import type { Container, Engine } from "tsparticles-engine";
 import { AuthContextProvider, useAuthContext } from './components/context/AuthContext';
 import Login from './components/Login';
+
 let theme = createTheme({
   palette: {
     primary: {
