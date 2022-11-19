@@ -20,6 +20,16 @@ model User {
   MarketAction        MarketAction[]
   Money               Float                 @default(10000)
   token               String                @unique @default(uuid())
+  follows  Follows[] @relation("follows")
+  followedBy Follows[] @relation("followedBy")
+}
+
+model Follows {
+    followsId Int
+    followedByID Int
+    follows   User     @relation(fields: [followsId], references: [id], name: "follows")
+    followedBy  User     @relation(fields: [followedByID], references: [id], name: "followedBy")
+    @@unique([followsId, followedByID])
 }
 
 enum TypeOfMarketAction {
