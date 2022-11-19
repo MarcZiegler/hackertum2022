@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { createContext, useCallback, useContext } from 'react'
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
 import BuildIcon from '@mui/icons-material/Build';
@@ -7,7 +7,11 @@ import FrontPage from './components/FrontPage';
 import { ThemeProvider } from '@emotion/react';
 import { createTheme, responsiveFontSizes, Grid, Typography } from '@mui/material';
 import StockPage from './components/StockPage';
-
+//import Particles from "react-particles";
+//import { loadFull } from "tsparticles";
+import type { Container, Engine } from "tsparticles-engine";
+import { AuthContextProvider, useAuthContext } from './components/context/AuthContext';
+import Login from './components/Login';
 let theme = createTheme({
   palette: {
     primary: {
@@ -50,14 +54,31 @@ let theme = createTheme({
   },
 });
 theme = responsiveFontSizes(theme);
-
 /**
    * Entry point and page routing
    * @returns component : {JSX.Element}
    */
 const App: React.FC = () => {
+  /*
+  const particlesInit = useCallback(async (engine: Engine) => {
+      console.log(engine);
+
+      // you can initialize the tsParticles instance (engine) here, adding custom shapes or presets
+      // this loads the tsparticles package bundle, it's the easiest method for getting everything ready
+      // starting from v2 you can add only the features you need reducing the bundle size
+      await loadFull(engine);
+  }, []);
+
+  const particlesLoaded = useCallback(async (container: Container | undefined) => {
+      await console.log(container);
+  }, []);
+  */
+  const authContext = useAuthContext();
   return <>
     <div className="App">
+      <AuthContextProvider>
+      {
+        authContext!.auth === null ? <Login/> :
       <Router>
         <ThemeProvider theme={theme}>
           <Routes>
@@ -67,6 +88,8 @@ const App: React.FC = () => {
           </Routes>
         </ThemeProvider>
       </Router>
+      }
+      </AuthContextProvider>
     </div>
   </>
 }
