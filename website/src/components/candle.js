@@ -55,7 +55,7 @@ export function CandlestickChart(data, {
     // Compute default domains and ticks.
     if (xDomain === undefined) xDomain = seconds(d3.min(X), d3.max(X));
     if (yDomain === undefined) yDomain = [d3.min(Yl), d3.max(Yh)];
-    if (xTicks === undefined) xTicks = seconds(d3.min(xDomain), d3.max(xDomain), 2);
+    if (xTicks === undefined) xTicks = seconds(d3.min(xDomain), d3.max(xDomain), 1);
   
     // Construct scales and axes.
     // If you were to plot a stock using d3.scaleUtc, you’d see distracting gaps
@@ -66,14 +66,14 @@ export function CandlestickChart(data, {
     const xScale = d3.scaleBand(xDomain, xRange).padding(xPadding);
     const yScale = yType(yDomain, yRange);
     const xAxis = d3.axisBottom(xScale).tickFormat(d3.utcFormat(xFormat)).tickValues(xTicks);
-    const yAxis = d3.axisLeft(yScale).ticks(height / 40, yFormat);
+    const yAxis = d3.axisLeft(yScale).ticks(height / 20, yFormat);
   
     // Compute titles.
     if (title === undefined) {
       const formatDate = d3.utcFormat("%B %-d, %Y");// 2022-11-19T16:22:22.130Z"
       const formatValue = d3.format(".2f");
       const formatChange = (f => (y0, y1) => f((y1 - y0) / y0))(d3.format("+.2%"));
-      title = i => `${formatDate(X[i])}
+      title = i => `${X[i]}
   Open: ${formatValue(Yo[i])}
   Close: ${formatValue(Yc[i])} (${formatChange(Yo[i], Yc[i])})
   Low: ${formatValue(Yl[i])}
@@ -109,7 +109,7 @@ export function CandlestickChart(data, {
             .text(yLabel));
   
             //console.log(xScale(X[0].toString()))
-            console.log(X[0])
+            //console.log(X[0])
     const g = svg.append("g")
         .attr("stroke", stroke)
         .attr("stroke-linecap", strokeLinecap)
@@ -118,7 +118,7 @@ export function CandlestickChart(data, {
       .join("g")
         .attr("transform", i => {
             //console.log(i/X.length)
-            return `translate(${((i)/X.length)*xScale.bandwidth()},0)`;
+            return `translate(${80+((i)/X.length)*xScale.bandwidth()},0)`; //TODO: fix this
         });
   
     g.append("line")

@@ -6,6 +6,7 @@ import StockPage from './StockPage';
 import { StockData } from 'GraphTypes';
 import Traders from './Traders';
 import { SERVER_URL } from './enums/Constants';
+import ListAltIcon from '@mui/icons-material/ListAlt';
 
 type FrontPageProps = {
 
@@ -40,8 +41,9 @@ export const FrontPage: React.FC<FrontPageProps> = (props) => {
                 marginX: "30%",
                 marginTop: "3%"
             }}
+            align="center"
         >
-            {props.children}
+            {props.children} <ListAltIcon fontSize="large"/>
         </Typography>
     );
     useEffect(() => {

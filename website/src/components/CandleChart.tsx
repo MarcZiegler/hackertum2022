@@ -6,6 +6,7 @@ import _ from 'lodash';
 import { GraphData } from 'GraphTypes';
 import { CandlestickChart } from './candle';
 import { SERVER_URL } from './enums/Constants';
+import { Backdrop, CircularProgress } from '@mui/material';
 
 type CandleProps = {
   data: GraphData[] | null;
@@ -57,6 +58,9 @@ const CandleChart: React.FC<CandleProps> = (props) => {
 
   return (
     <>
+      <Backdrop open={props.data === null} sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
       <Box sx={{ zIndex: 5 , position: "relative", marginLeft: "2%", marginRight: "2%"}}>
         <svg width="100%" height={window.innerHeight} ref={containerRef} style={{position: "absolute" , background: "white"}}>
           <svg id="content">
