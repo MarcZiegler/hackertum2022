@@ -79,7 +79,7 @@ export const tradeHistory = async (
         const profits = [...traders, ...windowTraders].map((trader) =>
           trader.calcProfit(lastPrice)
         );
-        resolve({ profits, windowdData });
+        resolve({ profits, windowdData, lastPrice });
       }
     );
   });

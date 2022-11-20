@@ -6,7 +6,7 @@ import axios from "axios";
 export const BUY_QUANTITY = 1;
 
 export abstract class BaseProfile {
-    lastBuyTradePerTicker = new Map<string, ITrade>();
+    public lastBuyTradePerTicker = new Map<string, ITrade>();
     currentFund: number;
     token: string;
     randomSpread: number;
@@ -82,21 +82,12 @@ export abstract class BaseProfile {
     }
 
     async performTrade(trade: ITrade): Promise<boolean> {
-        if (trade == null) {
+        if (trade == null || trade.quantity <= 0) {
             console.log("trade is null");
             return false;
         }
         try {
-            const options = {
-                method: 'POST',
-                url: `http://${process.env.MARKET_URL}:${process.env.MARKET_PORT}/market-action`,
-                headers: {
-                    session: this.token,
-                    'Content-Type': 'application/json'
-                },
-                data: {ticker: 'AMZN', marketAction: 'SELL', shares: 1, price: 0.01062882}
-            };
-           /* const response = await axios.post<ITrade, any>(
+            const response = await axios.post<ITrade, any>(
                 `http://${process.env.MARKET_URL}:${process.env.MARKET_PORT}/market-action`,
                 {
                     ticker: trade.symbol,
@@ -110,10 +101,8 @@ export abstract class BaseProfile {
                         session: this.token,
                     },
                 }
-            );*/
-
-            const response = await axios.request(options);
-
+            );
+            console.log('trading', trade)
             return response.data;
         } catch (error) {
             if (axios.isAxiosError(error)) {

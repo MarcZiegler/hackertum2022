@@ -16,39 +16,31 @@ export class MarketMover extends BaseProfile {
 
   fullfillOrders = async () => {
     const orders = await this.getOrders();
+    for(const order of orders.buyOrders) {
+      await this.fullfiilOne({
+        ...order,
+        type: TradeType.SELL,
+        sellPrice: order.price
+      })
+    }
+    for(const order of orders.sellOrders) {
+      await this.fullfiilOne({
+        ...order,
+        type: TradeType.BUY,
+        buyPrice: order.price,
+      })
+    }
+  }
 
+  fullfiilOne = async (order) => {
     return new Promise((resolve, reject) => {
-      let processed = 0;
-      const subject = new BehaviorSubject<ITrade>(null);
-      const subject$ = subject.asObservable();
-      const sub = subject$.pipe(
-          delay(2000),
-          tap((trade) => {
-            this.performTrade(trade);
-            processed++;
-            if(processed === orders.buyOrders.length + orders.sellOrders.length) {
-              resolve;
-            }
-          }),
-      ).subscribe();
-
-      for(const order of orders.buyOrders) {
-        subject.next( {
-          ...order,
-          type: TradeType.SELL,
-          sellPrice: order.price
-        });
-      }
-      for(const order of orders.sellOrders) {
-        subject.next( {
-          ...order,
-          type: TradeType.BUY,
-          buyPrice: order.price
-        })
-      }
+      setTimeout(async() => {
+        await this.performTrade(order);
+        resolve(true);
+      }, 2000);
     })
   }
-  
+
   // checkMarket = async (): Promise<any> => {
   //   noActionCount++;
   //   if (noActionCount === NO_ACTION_PERIOD) {

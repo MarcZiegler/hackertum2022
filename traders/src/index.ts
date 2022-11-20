@@ -8,6 +8,8 @@ import { SmaProfile } from "./profiles/sma-profile";
 import { tradeHistory } from "./historic-trader";
 import { createUser } from "./market-handler";
 import { MarketMover } from "./market-MOVER";
+import {BuyerProfile} from "./profiles/buyer-profile";
+import {ITrade} from "./types/types";
 
 dotenv.config();
 
@@ -20,6 +22,7 @@ const main = async () => {
     new PercentageProfile("Carol", 0.15, 0.1),
     new PercentageProfile("Max", 1, 0.15),
     new PercentageProfile("Leo", 0.1, 0.25),
+    new BuyerProfile("Hodler"),
     new RandomProfile("Sara", 0.5),
     new RandomProfile("Moe", 0.2),
     // new PercentageProfile(0.10, 0.35),
@@ -36,7 +39,7 @@ const main = async () => {
 
   const allTraders = [...traders, ...windowTraders];
 
-  const { profits, windowdData } = await tradeHistory(traders, windowTraders);
+  const { profits, windowdData, lastPrice } = await tradeHistory(traders, windowTraders);
   console.log(profits);
 
   allTraders.forEach((trader, idx) => {
@@ -47,6 +50,7 @@ const main = async () => {
     let res = await createUser(trader);
     trader.initFund = res.money;
     trader.token = res.token;
+    trader.lastBuyTradePerTicker = new Map<string, ITrade>();
   });
 
   const marketMover = new MarketMover("Market Mover", true);
@@ -54,15 +58,33 @@ const main = async () => {
   marketMover.initFund = res.money;
   marketMover.token = res.token;
 
+  let snapshot = [];
+  let start = true;
+  let lastPeriod;
   do {
-    const lastPeriod = await marketMover.getLastTradeForAll();
-    const snapshot = lastPeriod.map((symbolObj) => {
-      const ticker = symbolObj.ticker;
-      const entry = { symbol: ticker, price: symbolObj.TickerHistory[0].price };
-      windowdData[ticker]?.splice(0, 1);
-      windowdData[ticker]?.push(entry);
-      return entry;
-    });
+    if (start) {
+      lastPeriod = lastPrice;
+      lastPrice.forEach((value, key) => {
+        snapshot.push({
+          symbol: key,
+          price: value,
+        })
+      });
+      snapshot.forEach((entry, idx) => {
+        windowdData[entry.symbol]?.splice(0, 1);
+        windowdData[entry.symbol]?.push(entry);
+      })
+      start = false;
+    } else {
+      lastPeriod = await marketMover.getLastTradeForAll();
+      snapshot = lastPeriod.map((symbolObj) => {
+        const ticker = symbolObj.ticker;
+        const entry = { symbol: ticker, price: symbolObj.TickerHistory[0].price };
+        windowdData[ticker]?.splice(0, 1);
+        windowdData[ticker]?.push(entry);
+        return entry;
+      });
+    }
 
     let promises = [];
     traders.map((trader) => promises.push(trader.update(snapshot, true)));

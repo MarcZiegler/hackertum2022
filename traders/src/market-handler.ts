@@ -25,7 +25,7 @@ export const createUser = async (user: BaseProfile): Promise<ICreateUserResponse
         username: user.username,
         pnl: user.pnl,
         isRealUser: false,
-     //   isMarketMover: user.isMarketMover,
+        isMarketMover: user.isMarketMover,
       },
       {
         headers: {
