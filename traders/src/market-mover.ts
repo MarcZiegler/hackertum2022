@@ -57,7 +57,7 @@ export class MarketMover extends BaseProfile {
   // createUser(user: BaseProfile): Promise<ICreateUserResponse> {
   //   try {
   //     const { money, token } = await axios.post<any, ICreateUserResponse>(
-  //       `https://${process.env.MARKET_URL}:${process.env.MARKET_PORT}/user`,
+  //       `http://${process.env.MARKET_URL}:${process.env.MARKET_PORT}/user`,
   //       {
   //         username: user.uuid,
   //       },
@@ -98,20 +98,27 @@ export class MarketMover extends BaseProfile {
   
   getTickerOrders = async (ticker: string, type: TradeType) => {
     try {
-      const response = await axios.post<any, any>(
-        `https://${process.env.MARKET_URL}:${process.env.MARKET_PORT}/trade/getAll`,
-        {
-          ticker: ticker,
-          type: type
-        },
+      const response = await axios.get<any, any>(
+        `http://${process.env.MARKET_URL}:${process.env.MARKET_PORT}/market-action`,
         {
           headers: {
             Accept: "application/json",
+            session: this.token,
           },
+          data: {
+            ticker: ticker,
+            marketAction: type
+          }
         }
       );
-  
-      return response;
+
+      return response.data.map((order) => {
+        return {
+          ...order,
+          symbol: ticker,
+          quantity: order.shares,
+        }
+      })
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.log("error message: ", error.message);
@@ -125,8 +132,9 @@ export class MarketMover extends BaseProfile {
 
   getLastTradeForAll = async (): Promise<any[]> => {
     try {
+      console.log(this.token)
       const response = await axios.get<any, any>(
-        `https://${process.env.MARKET_URL}:${process.env.MARKET_PORT}/ticker`,
+        `http://${process.env.MARKET_URL}:${process.env.MARKET_PORT}/ticker`,
         {
           headers: {
             Accept: "application/json",
@@ -135,7 +143,7 @@ export class MarketMover extends BaseProfile {
         }
       );
   
-      return response;
+      return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.log("error message: ", error.message);

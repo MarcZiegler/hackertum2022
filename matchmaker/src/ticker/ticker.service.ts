@@ -54,7 +54,7 @@ export class TickerService {
     }
 
     let res = await this.prisma.$queryRaw<TickerPricing[]>`SELECT DISTINCT price as FirstPrice, MIN(price) as MinPrice, MAX(price) as MaxPrice, SUM(TickerHistory.amount) as Volume,  TickerHistory.executed_at FROM TickerHistory where TickerHistory.tickerId = ${t.id} GROUP BY HOUR(TickerHistory.executed_at), MINUTE(TickerHistory.executed_at), TickerHistory.executed_at, price LIMIT ${limit}`;
-
+    Logger.log(res[0]);
     return {
         ticker: t,
         historicalData: res

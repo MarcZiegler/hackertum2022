@@ -8,4 +8,6 @@ export class CreateUserDto {
     isRealUser: boolean;
     @IsOptional()
     pnl: number;
+    @IsOptional()
+    isMarketMover: boolean| null;
 }
