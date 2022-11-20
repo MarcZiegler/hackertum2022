@@ -1,9 +1,10 @@
-import {Controller, Get, Post, Body, Param, Delete, Headers, UseGuards} from '@nestjs/common';
+import {Controller, Get, Post, Body, Param, Delete, Headers, UseGuards, Logger, Query} from '@nestjs/common';
 import { MarketActionService } from './market-action.service';
 import { CreateMarketActionDto } from './dto/create-market-action.dto';
 import {UserGuard} from "../user/user.guard";
 import {FindAllMarketActionDto} from "./dto/find-all-market-action.dto";
 import { TypeOfMarketAction } from '@prisma/client';
+import * as QueryString from "querystring";
 
 @Controller('market-action')
 export class MarketActionController {
@@ -23,7 +24,8 @@ export class MarketActionController {
 
   @Get("params")
   @UseGuards(UserGuard)
-  async findparam(@Param('id') id: string, @Param('type') type: TypeOfMarketAction) {
+  async findparam(@Query('id') id: string, @Query('type') type: TypeOfMarketAction) {
+    Logger.log("Got id: " + id + " and type: " + type);
     return await this.marketActionService.findAll(id, type);
   }
 

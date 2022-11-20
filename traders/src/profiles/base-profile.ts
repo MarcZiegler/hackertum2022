@@ -11,6 +11,7 @@ export abstract class BaseProfile {
     token: string;
     randomSpread: number;
     pnl: number;
+    id: string;
 
     constructor(public username: string, public isMarketMover = false, public initFund: number = 10000) {
         // this.uuid = uuidv4();
@@ -81,9 +82,45 @@ export abstract class BaseProfile {
         return null;
     }
 
-    async performTrade(trade: ITrade): Promise<boolean> {
-        if (trade == null || trade.quantity <= 0) {
-            console.log("trade is null");
+    async performTrade(trade: any, delete2:boolean = false): Promise<boolean> {
+
+        if (delete2) {
+            try {
+                const response = await axios.delete<ITrade, any>(
+                    `http://${process.env.MARKET_URL}:${process.env.MARKET_PORT}/market-action`,
+                    {
+                        headers: {
+                            Accept: "application/json",
+                            session: this.token,
+                        },
+                        data: {
+                            ticker: trade.symbol,
+                            marketAction: trade.type,
+                            shares: trade.quantity,
+                            price: trade.type === TradeType.BUY ? trade.buyPrice : trade.sellPrice,
+                        }
+                    },
+                );
+                console.log('trading', trade)
+                return response.data;
+            } catch (error) {
+                if (axios.isAxiosError(error)) {
+                    console.log("error message: ", error.message, " sent message body: ", {
+                        ticker: trade.symbol,
+                        marketAction: trade.type,
+                        shares: trade.quantity,
+                        price: trade.type === TradeType.BUY ? trade.buyPrice : trade.sellPrice,
+                    });
+                    return false;
+                } else {
+                    console.log("unexpected error: ", error);
+                    return false;
+                }
+            }
+        }
+
+        if (trade == null || trade.quantity <= 0 || trade.userId == this.id) {
+            console.log("trade is null", trade);
             return false;
         }
         try {

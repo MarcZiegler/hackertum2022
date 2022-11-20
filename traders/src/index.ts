@@ -13,22 +13,25 @@ import {ITrade} from "./types/types";
 
 dotenv.config();
 
-export const SYMBOLS = ["AAPL", "MSFT", "GOOGL", "GME", "AMZN", "MS"];
+export const SYMBOLS = ["AMZN", "MSFT", "GOOGL", "GME", "AAPL", "MS"];
+//export const SYMBOLS = [ "AMZN"];
 export const WINDOW_SIZE = 14;
 
 const main = async () => {
   const traders: BaseProfile[] = [
-    new PercentageProfile("John", 0.1, 0.15),
-    new PercentageProfile("Carol", 0.15, 0.1),
-    new PercentageProfile("Max", 1, 0.15),
+    new PercentageProfile("Chimp", 0.1, 0.15),
+    new PercentageProfile("Elon", 0.15, 0.1),
+    new PercentageProfile("Diamondhands", 1, 0.15),
     new PercentageProfile("Leo", 0.1, 0.25),
     new BuyerProfile("Hodler"),
-    new RandomProfile("Sara", 0.5),
+    new RandomProfile("Bloomberg", 0.5),
     new RandomProfile("Moe", 0.2),
-    // new PercentageProfile(0.10, 0.35),
-    // new PercentageProfile(0.15, 0.3),
-    // new PercentageProfile(1, 0.35),
-    // new PercentageProfile(0.30, 0.25),
+    new RandomProfile("Minimind", 0.9),
+    new RandomProfile("Megamind", 0.6),
+    new PercentageProfile('Max',0.10, 0.35),
+    new PercentageProfile('Chris',0.15, 0.3),
+    new PercentageProfile('Marc',1, 0.35),
+    new PercentageProfile('Flo',0.30, 0.25),
   ];
 
   const windowTraders = [
@@ -50,6 +53,7 @@ const main = async () => {
     let res = await createUser(trader);
     trader.initFund = res.money;
     trader.token = res.token;
+    trader.id = res.id;
     trader.lastBuyTradePerTicker = new Map<string, ITrade>();
   });
 
@@ -94,6 +98,7 @@ const main = async () => {
     );
 
     const strats = await Promise.all(promises);
+
 
     await marketMover.fullfillOrders();
     console.log('looping')

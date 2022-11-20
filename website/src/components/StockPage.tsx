@@ -98,7 +98,8 @@ export const StockPage: React.FC<StockPageProps> = (props) => {
             })
             .then(response => response.json())
             .then(data => {
-                //console.log(data)
+                console.log("BUY")
+                console.log(data)
                 setBuyData(data.map((d: any) => {
                     return {
                         price: d.price,
@@ -117,7 +118,8 @@ export const StockPage: React.FC<StockPageProps> = (props) => {
             })
             .then(response => response.json())
             .then(data => {
-                //console.log(data)
+                console.log("SELL")
+                console.log(data)
                 setSellData(data.map((d: any) => {
                     return {
                         price: d.price,

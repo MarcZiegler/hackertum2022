@@ -53,13 +53,14 @@ export const FrontPage: React.FC<FrontPageProps> = (props) => {
         })
             .then(response => response.json())
             .then(data => {
+                console.log(data)
                 setStockData(data.map(function (m: any) {
                     return {
-                        id: m.id,
-                        tag: m.ticker,
-                        name: m.name,
-                        lastPrice: m.TickerHistory[0].price,
-                        lastAmount: m.TickerHistory[0].amount,
+                        id: m.id ?? 0,
+                        tag: m.ticker ?? 'Loading...',
+                        name: m.name ?? 'Loading...',
+                        lastPrice: m.TickerHistory[0]?.price ?? 'Loading...',
+                        lastAmount: m.TickerHistory[0]?.amount ?? 'Loading...',
                     }
                 }))
             }) //TODO: add error handling
@@ -99,11 +100,11 @@ export const FrontPage: React.FC<FrontPageProps> = (props) => {
 
                         >
                             <TableCell component="th" scope="row">
-                                {s.name}
+                                {s.name ?? "Loading..."}
                             </TableCell>
-                            <TableCell align="right">{s.tag}</TableCell>
-                            <TableCell align="right">{s.lastPrice}</TableCell>
-                            <TableCell align="right">{s.lastAmount}</TableCell>
+                            <TableCell align="right">{s.tag ?? "Loading..."}</TableCell>
+                            <TableCell align="right">{s.lastPrice ?? "Loading..."}</TableCell>
+                            <TableCell align="right">{s.lastAmount ?? "Loading..."}</TableCell>
                         </TableRow>
                     ))}
                 </Table>

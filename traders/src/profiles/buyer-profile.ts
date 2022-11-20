@@ -13,9 +13,9 @@ export class BuyerProfile extends BaseProfile {
     lastTrade: ITrade | null,
     currentPrice: number
   ): TradeType | null {
-    if (!lastTrade) {
+    //if (!lastTrade) {
       return TradeType.BUY;
-    }
-    return null;
+    //}
+    //return null;
   }
 }

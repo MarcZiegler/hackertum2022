@@ -4,6 +4,7 @@ import axios from "axios";
 interface ICreateUserResponse {
   money: number;
   token: string;
+  id: string;
 }
 
 /*export const createUsers = async (traders: BaseProfile[]): Promise<any> => {
@@ -33,7 +34,7 @@ export const createUser = async (user: BaseProfile): Promise<ICreateUserResponse
         },
       }
     );
-    return { money: response.data.Money, token: response.data.token};
+    return { money: response.data.Money, token: response.data.token, id: response.data.id };
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.log("error message: ", error.message);

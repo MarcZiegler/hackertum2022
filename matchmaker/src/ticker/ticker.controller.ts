@@ -1,4 +1,4 @@
-import {Controller, Get, Post, Body, Patch, Param, Delete, UseGuards} from '@nestjs/common';
+import {Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Logger} from '@nestjs/common';
 import { TickerService } from './ticker.service';
 import { CreateTickerDto } from './dto/create-ticker.dto';
 import {UserGuard} from "../user/user.guard";
@@ -16,6 +16,7 @@ export class TickerController {
   @UseGuards(UserGuard)
   @Get()
   findAll() {
+    Logger.log("findAll");
     return this.tickerService.findAll();
   }
 

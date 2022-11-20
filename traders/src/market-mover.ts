@@ -15,7 +15,25 @@ let noActionCount = 0;
 export class MarketMover extends BaseProfile {
 
   fullfillOrders = async () => {
-    const orders = await this.getOrders();
+    let orders = await this.getOrders();
+    console.log(orders)
+    const myBuyOrders = orders.buyOrders.filter(order => order.userId === this.id);
+    const mySellOrders = orders.sellOrders.filter(order => order.userId === this.id);
+    for(const order of myBuyOrders) {
+      await this.deleteOne({
+        ...order,
+        type: TradeType.SELL,
+        sellPrice: order.price
+      })
+    }
+    for(const order of mySellOrders) {
+      await this.deleteOne({
+        ...order,
+        type: TradeType.BUY,
+        buyPrice: order.price,
+      })
+    }
+    orders = await this.getOrders();
     for(const order of orders.buyOrders) {
       await this.fullfiilOne({
         ...order,
@@ -32,7 +50,18 @@ export class MarketMover extends BaseProfile {
     }
   }
 
+  deleteOne = async (order) => {
+    console.log('deleting')
+    return new Promise((resolve, reject) => {
+      setTimeout(async() => {
+        await this.performTrade(order, true);
+        resolve(true);
+      }, 200);
+    })
+  }
+
   fullfiilOne = async (order) => {
+    console.log('fullfilling')
     return new Promise((resolve, reject) => {
       setTimeout(async() => {
         await this.performTrade(order);

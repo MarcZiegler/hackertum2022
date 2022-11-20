@@ -33,7 +33,7 @@ export const tradeHistory = async (
           quotes[symbol] = quotes[symbol].reverse();
         });
 
-        const numOfSamples = quotes["AAPL"].length;
+        const numOfSamples = quotes["AMZN"].length;
         const windowdData: Record<string, { symbol: string; price: number }[]> =
           {};
         SYMBOLS.forEach((symbol) => (windowdData[symbol] = []));
