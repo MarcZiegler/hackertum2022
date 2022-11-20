@@ -74,6 +74,7 @@ const main = async () => {
     const strats = await Promise.all(promises);
 
     await marketMover.fullfillOrders();
+    console.log('looping')
   } while (true);
 };
 
