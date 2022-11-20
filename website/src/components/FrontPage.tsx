@@ -1,10 +1,13 @@
-import {List, Stack, Table, TableCell, TableHead, TableRow, Typography, TypographyProps, useTheme} from '@mui/material';
+import {Button, Drawer, List, Stack, Table, TableCell, TableHead, TableRow, Typography, TypographyProps, useTheme} from '@mui/material';
 import React, {useEffect, useRef, useState} from 'react';
 import _ from 'lodash';
 import CandleChart from './CandleChart';
 import StockPage from './StockPage';
 import {StockData} from 'GraphTypes';
 import Traders from './Traders';
+import AlignHorizontalLeftSharpIcon from '@mui/icons-material/AlignHorizontalLeftSharp';
+import AlignHorizontalRightSharpIcon from '@mui/icons-material/AlignHorizontalRightSharp';
+import GroupsIcon from '@mui/icons-material/Groups';
 import {SERVER_URL} from './enums/Constants';
 import {useAuthContext} from './context/AuthContext';
 
@@ -31,18 +34,17 @@ export const FrontPage: React.FC<FrontPageProps> = (props) => {
     ]);
     const SubtitleTypography = (props: TypographyProps) => (
         <Typography
-            color={theme.palette.primary.main}
             variant="h4"
             sx={{
                 marginX: "30%",
                 marginTop: "3%"
             }}
+            align="center"
         >
-            {props.children}
+            <AlignHorizontalRightSharpIcon  opacity="30%"/> {props.children} <AlignHorizontalLeftSharpIcon opacity="30%"/>
         </Typography>
     );
     useEffect(() => {
-
         fetch(SERVER_URL + "/ticker", {
             method: "GET",
             headers: {
@@ -64,7 +66,7 @@ export const FrontPage: React.FC<FrontPageProps> = (props) => {
     }, [])
     return (
         <>
-        <Button onClick={()=>setOpenDrawer(true)} sx={{position:"fixed",top:"0",left:"", marginLeft:"5px",marginTop:"5px"}}>Show Traders</Button>
+        <Button size="large" startIcon={<GroupsIcon fontSize='large'/>} onClick={()=>setOpenDrawer(true)} sx={{position:"fixed",top:"0",left:"", marginLeft:"10px",marginTop:"10px", textTransform:"none"}}>Setup Traders</Button>
         <Stack>
             <SubtitleTypography>Stocks</SubtitleTypography>
             <Drawer
@@ -72,12 +74,8 @@ export const FrontPage: React.FC<FrontPageProps> = (props) => {
                 open={openDrawer}
                 onClose={() => {setOpenDrawer(false)}}
             >
-
                 <Traders/>
             </Drawer>
-            {stockData ? 
-                <Table style={{marginLeft: "2%", marginRight:"2%", width: "96%"}}>
-            <Traders/>
             {stockData ?
                 <Table style={{marginLeft: "2%", marginRight: "2%", width: "96%"}}>
                     <TableHead>
@@ -113,8 +111,8 @@ export const FrontPage: React.FC<FrontPageProps> = (props) => {
                 <Typography>Loading...</Typography>
             }
         </Stack>
+        </>
     );
-
 }
 
 export default FrontPage;

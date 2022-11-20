@@ -6,6 +6,7 @@ import _ from 'lodash';
 import { GraphData } from 'GraphTypes';
 import { CandlestickChart } from './candle';
 import { SERVER_URL } from './enums/Constants';
+import { Backdrop, CircularProgress } from '@mui/material';
 
 type CandleProps = {
   data: GraphData[] | null;
@@ -20,7 +21,7 @@ const CandleChart: React.FC<CandleProps> = (props) => {
   const containerRef = useRef<any>(null);
   // SVG debounced with to trigger rerender on window size change
   const [width, setWidth] = useState<number | undefined>(1000);
-  console.log(props?.data)
+  //console.log(props?.data)
   useEffect(() => {
     // Debounced rerender on resize
     const handleResize = debounce(() => setWidth(containerRef.current.clientWidth), 500);
@@ -57,6 +58,9 @@ const CandleChart: React.FC<CandleProps> = (props) => {
 
   return (
     <>
+      <Backdrop open={props.data === null} sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
       <Box sx={{ zIndex: 5 , position: "relative", marginLeft: "2%", marginRight: "2%"}}>
         <svg width="100%" height={window.innerHeight} ref={containerRef} style={{position: "absolute" , background: "white"}}>
           <svg id="content">
