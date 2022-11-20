@@ -3,6 +3,7 @@ import { MarketActionService } from './market-action.service';
 import { CreateMarketActionDto } from './dto/create-market-action.dto';
 import {UserGuard} from "../user/user.guard";
 import {FindAllMarketActionDto} from "./dto/find-all-market-action.dto";
+import { TypeOfMarketAction } from '@prisma/client';
 
 @Controller('market-action')
 export class MarketActionController {
@@ -18,6 +19,12 @@ export class MarketActionController {
   @UseGuards(UserGuard)
   async findAll(@Body() body: FindAllMarketActionDto) {
     return await this.marketActionService.findAll(body.ticker, body.marketAction);
+  }
+
+  @Get("params")
+  @UseGuards(UserGuard)
+  async findparam(@Param('id') id: string, @Param('type') type: TypeOfMarketAction) {
+    return await this.marketActionService.findAll(id, type);
   }
 
   @Delete(':id')
