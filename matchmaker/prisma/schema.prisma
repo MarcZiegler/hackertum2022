@@ -14,7 +14,7 @@ datasource db {
 
 model User {
   id                  Int                   @id @default(autoincrement())
-  username            String                @unique // max length 191 chars
+  username            String
   isRealUser          Boolean               @default(true) // is the user a real user or controlled by a server
   MarketActionHistory MarketActionHistory[]
   MarketAction        MarketAction[]

@@ -6,7 +6,7 @@ import { RsiProfile } from "./profiles/rsi-profile";
 import { EmaProfile } from "./profiles/ema-profile";
 import { SmaProfile } from "./profiles/sma-profile";
 import { tradeHistory } from "./historic-trader";
-import { createUser, createUsers } from "./market-handler";
+import { createUser } from "./market-handler";
 import { MarketMover } from "./market-MOVER";
 
 dotenv.config();
@@ -42,10 +42,17 @@ const main = async () => {
   allTraders.forEach((trader, idx) => {
     trader.pnl = profits[idx];
   });
-  await createUsers(allTraders);
+
+  allTraders.forEach(async (trader) => {
+    let res = await createUser(trader);
+    trader.initFund = res.money;
+    trader.token = res.token;
+  });
 
   const marketMover = new MarketMover("Market Mover", true);
-  await createUser(marketMover);
+  let res = await createUser(marketMover);
+  marketMover.initFund = res.money;
+  marketMover.token = res.token;
 
   do {
     const lastPeriod = await marketMover.getLastTradeForAll();
@@ -67,6 +74,7 @@ const main = async () => {
     const strats = await Promise.all(promises);
 
     await marketMover.fullfillOrders();
+    console.log('looping')
   } while (true);
 };
 

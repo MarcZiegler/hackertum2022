@@ -16,8 +16,11 @@ export class UserService {
 
     try {
       return this.prisma.user.create({
-        data: createUserDto,
-
+        data: {
+            username: createUserDto.username,
+            isRealUser: createUserDto.isRealUser,
+            Money: createUserDto.isMarketMover ? 100000000 : 10000,
+        },
       });
     } catch (e) {
       Logger.error(e);

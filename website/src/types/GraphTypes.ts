@@ -10,6 +10,8 @@ export type StockData = {
     id: number,
     tag: string,
     name: string,
+    lastPrice: number,
+    lastAmount: number,
 }
     // Adj Close: 168.808151
 export type GraphMetadata = {

@@ -92,7 +92,7 @@ export class MarketActionService {
                 create: {
                     user: {
                         connect: {
-                            token: session
+                            id: userId.id
                         }
                     },
                     ticker: {

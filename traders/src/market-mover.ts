@@ -2,7 +2,7 @@ import { BaseProfile } from "./profiles/base-profile";
 import axios from "axios";
 import { SYMBOLS } from ".";
 import { ITrade, TradeType } from "./types/types";
-
+import {BehaviorSubject, delay, Observable, tap} from 'rxjs'
 const NO_ACTION_PERIOD = 5;
 
 interface ICreateUserResponse {
@@ -16,20 +16,37 @@ export class MarketMover extends BaseProfile {
 
   fullfillOrders = async () => {
     const orders = await this.getOrders();
-    for(const order of orders.buyOrders) {
-     this.performTrade({
-        ...order,
-        type: TradeType.SELL,
-        sellPrice: order.buyPrice
-      })
-    }
-    for(const order of orders.sellOrders) {
-      this.performTrade({
-        ...order,
-        type: TradeType.BUY,
-        buyPrice: order.sellPrice
-      })
-    }
+
+    return new Promise((resolve, reject) => {
+      let processed = 0;
+      const subject = new BehaviorSubject<ITrade>(null);
+      const subject$ = subject.asObservable();
+      const sub = subject$.pipe(
+          delay(2000),
+          tap((trade) => {
+            this.performTrade(trade);
+            processed++;
+            if(processed === orders.buyOrders.length + orders.sellOrders.length) {
+              resolve;
+            }
+          }),
+      ).subscribe();
+
+      for(const order of orders.buyOrders) {
+        subject.next( {
+          ...order,
+          type: TradeType.SELL,
+          sellPrice: order.price
+        });
+      }
+      for(const order of orders.sellOrders) {
+        subject.next( {
+          ...order,
+          type: TradeType.BUY,
+          buyPrice: order.price
+        })
+      }
+    })
   }
   
   // checkMarket = async (): Promise<any> => {
@@ -57,7 +74,7 @@ export class MarketMover extends BaseProfile {
   // createUser(user: BaseProfile): Promise<ICreateUserResponse> {
   //   try {
   //     const { money, token } = await axios.post<any, ICreateUserResponse>(
-  //       `https://${process.env.MARKET_URL}:${process.env.MARKET_PORT}/user`,
+  //       `http://${process.env.MARKET_URL}:${process.env.MARKET_PORT}/user`,
   //       {
   //         username: user.uuid,
   //       },
@@ -80,9 +97,9 @@ export class MarketMover extends BaseProfile {
   //   }
   // }
   
-  getOrders = async (): Promise<{buyOrders: ITrade[], sellOrders: ITrade[]}> => {
-    const buyOrders: ITrade[] = [];
-    const sellOrders: ITrade[] = [];
+  getOrders = async (): Promise<{buyOrders: any[], sellOrders: any[]}> => {
+    const buyOrders = [];
+    const sellOrders = [];
     for(const symbol of SYMBOLS) {
       const buys = await this.getTickerOrders(symbol, TradeType.BUY);
       const sells = await this.getTickerOrders(symbol, TradeType.SELL);
@@ -92,26 +109,33 @@ export class MarketMover extends BaseProfile {
 
     return {
       buyOrders,
-      sellOrders
+      sellOrders,
     };
   }
-  
+
   getTickerOrders = async (ticker: string, type: TradeType) => {
     try {
-      const response = await axios.post<any, any>(
-        `https://${process.env.MARKET_URL}:${process.env.MARKET_PORT}/trade/getAll`,
-        {
-          ticker: ticker,
-          type: type
-        },
+      const response = await axios.get<any, any>(
+        `http://${process.env.MARKET_URL}:${process.env.MARKET_PORT}/market-action`,
         {
           headers: {
             Accept: "application/json",
+            session: this.token,
           },
+          data: {
+            ticker: ticker,
+            marketAction: type
+          }
         }
       );
-  
-      return response;
+
+      return response.data.map((order) => {
+        return {
+          ...order,
+          symbol: ticker,
+          quantity: order.shares,
+        }
+      })
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.log("error message: ", error.message);
@@ -125,8 +149,9 @@ export class MarketMover extends BaseProfile {
 
   getLastTradeForAll = async (): Promise<any[]> => {
     try {
+      console.log(this.token)
       const response = await axios.get<any, any>(
-        `https://${process.env.MARKET_URL}:${process.env.MARKET_PORT}/ticker`,
+        `http://${process.env.MARKET_URL}:${process.env.MARKET_PORT}/ticker`,
         {
           headers: {
             Accept: "application/json",
@@ -135,7 +160,7 @@ export class MarketMover extends BaseProfile {
         }
       );
   
-      return response;
+      return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.log("error message: ", error.message);
