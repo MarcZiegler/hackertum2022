@@ -8,7 +8,7 @@ const AuthContext = React.createContext<AuthContextType>({auth:null, setAuth:nul
 export function AuthContextProvider(props:any) {
     const jsonAuth = window.localStorage.getItem(LOCAL_STORAGE_AUTH_KEY);
     const [auth, setAuth] = React.useState<AuthType | null>(jsonAuth !== null ? JSON.parse(jsonAuth) : null);
-    console.log(auth)
+    //console.log(auth)
   return (
     <AuthContext.Provider value={{auth:auth,setAuth:setAuth}}>
         {auth === null ? <Login/> :

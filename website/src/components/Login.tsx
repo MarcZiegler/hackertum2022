@@ -39,17 +39,20 @@ export const Login: React.FC<LoginProps> = (props) => {
             setLoading(false);
             if (response.ok) {
                 response.json().then((data) => {
+                    /*
                     console.log({
                         token: data.token, //uuid
                         username: data.username, //username
                         money: data.Money, //money
                     } as AuthType)
                     console.log(data.Money)
+                    */
                     if (setAuth !== null) {
                         let authParsed: AuthType = {
                             token: data.token, //uuid
                             username: data.username, //username
                             money: data.Money, //money
+                            pnl: data.pnl,
                         }
                         //setAuth(authParsed) //TODO: this does nothing
                         window.localStorage.setItem(LOCAL_STORAGE_AUTH_KEY, JSON.stringify(authParsed))

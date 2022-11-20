@@ -5,7 +5,9 @@ import CandleChart from './CandleChart';
 import StockPage from './StockPage';
 import {StockData} from 'GraphTypes';
 import Traders from './Traders';
-import ListAltIcon from '@mui/icons-material/ListAlt';
+import AlignHorizontalLeftSharpIcon from '@mui/icons-material/AlignHorizontalLeftSharp';
+import AlignHorizontalRightSharpIcon from '@mui/icons-material/AlignHorizontalRightSharp';
+import GroupsIcon from '@mui/icons-material/Groups';
 import {SERVER_URL} from './enums/Constants';
 import {useAuthContext} from './context/AuthContext';
 
@@ -32,7 +34,6 @@ export const FrontPage: React.FC<FrontPageProps> = (props) => {
     ]);
     const SubtitleTypography = (props: TypographyProps) => (
         <Typography
-            color={theme.palette.primary.main}
             variant="h4"
             sx={{
                 marginX: "30%",
@@ -40,11 +41,10 @@ export const FrontPage: React.FC<FrontPageProps> = (props) => {
             }}
             align="center"
         >
-            {props.children} <ListAltIcon fontSize="large"/>
+            <AlignHorizontalRightSharpIcon  opacity="30%"/> {props.children} <AlignHorizontalLeftSharpIcon opacity="30%"/>
         </Typography>
     );
     useEffect(() => {
-
         fetch(SERVER_URL + "/ticker", {
             method: "GET",
             headers: {
@@ -66,7 +66,7 @@ export const FrontPage: React.FC<FrontPageProps> = (props) => {
     }, [])
     return (
         <>
-        <Button onClick={()=>setOpenDrawer(true)} sx={{position:"fixed",top:"0",left:"", marginLeft:"5px",marginTop:"5px"}}>Show Traders</Button>
+        <Button size="large" startIcon={<GroupsIcon fontSize='large'/>} onClick={()=>setOpenDrawer(true)} sx={{position:"fixed",top:"0",left:"", marginLeft:"10px",marginTop:"10px", textTransform:"none"}}>Setup Traders</Button>
         <Stack>
             <SubtitleTypography>Stocks</SubtitleTypography>
             <Drawer

@@ -21,7 +21,7 @@ const CandleChart: React.FC<CandleProps> = (props) => {
   const containerRef = useRef<any>(null);
   // SVG debounced with to trigger rerender on window size change
   const [width, setWidth] = useState<number | undefined>(1000);
-  console.log(props?.data)
+  //console.log(props?.data)
   useEffect(() => {
     // Debounced rerender on resize
     const handleResize = debounce(() => setWidth(containerRef.current.clientWidth), 500);
