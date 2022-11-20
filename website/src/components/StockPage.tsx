@@ -1,9 +1,13 @@
 import { Backdrop, Button, Paper, Slide, Stack, Table, TableCell, TableFooter, TableHead, TablePagination, TableRow, Typography, TypographyProps, useTheme } from '@mui/material';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import _ from 'lodash';
 import CandleChart from './CandleChart';
 import { useParams } from 'react-router';
-import fakedata from "../assets/fakedata.json"
+//import fakedata from "../assets/fakedata.json"
+import { SERVER_URL } from './enums/Constants';
+import { GraphData } from 'GraphTypes';
+import { useAuthContext } from './context/AuthContext';
+//import * as d3 from "d3";
 
 type StockPageProps = {
     id?: number
@@ -31,11 +35,47 @@ const fakebsdata = [
  */
 export const StockPage: React.FC<StockPageProps> = (props) => {
     const { id } = useParams();
+    const {auth, setAuth} = useAuthContext();
+    const DATA_ENDPOINT = SERVER_URL + "/ticker/" + id;
     //console.log(id)
     const theme = useTheme();
     const [open, setOpen] = useState(false);
     const [buyData, setBuyData] = useState<BuySellData[] | null>(fakebsdata);
     const [sellData, setSellData] = useState<BuySellData[] | null>(fakebsdata);
+    const [data, setData] = useState<GraphData[] | null>(null);
+
+    // Set interval to pull raw data
+    useEffect(() => {
+        const updateInterval = setInterval(() => {
+            // Update data
+            fetch(DATA_ENDPOINT, {
+                method: "GET",
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8',
+                    'session': auth!.token
+                },
+            }).then(response => response.json())
+                .then(data => {
+                    const egdate = data.historicalData[0].executed_at;
+                    console.log(egdate)
+                    console.log(new Date(egdate));
+                    const d2 = data.historicalData[data.historicalData.length-1].executed_at;
+                    console.log(d2)
+                    console.log(new Date(d2));
+                    setData(data.historicalData.map((d: any) => {
+                        return {
+                            Date: d.executed_at,
+                            Open: d.FirstPrice,
+                            High: d.MaxPrice,
+                            Low: d.MinPrice,
+                            Close: d.FirstPrice, //This is worng
+                            Volume: d.Volume
+                        } as GraphData
+                    }))
+                }) //TODO: add error handling
+        }, 3000); //TODO: make interval smaller
+        return () => clearInterval(updateInterval);
+    }, []);
     const handleClose = () => {
       setOpen(false);
     };
@@ -91,10 +131,11 @@ export const StockPage: React.FC<StockPageProps> = (props) => {
             </Stack>
         </Slide>
     )
+    //data.slice(-120)
     return (
         <>
         <IdTypography/>
-        <CandleChart data={fakedata.slice(-120)}/>
+        <CandleChart data={data?.slice(-100) ?? null}/>
         <Button 
             onClick={handleToggle} 
             sx={{
